@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+	<include
+		resource="org/springframework/boot/logging/logback/base.xml" />
+<springProperty scope="context" name="springAppName" source="spring.application.name"/>
+	
+    <appender name="FILE_BEATS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>C:/Users/Shahid_Hasan/JPoP/JPoP6/development/logs/library-service.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <charset>utf-8</charset>
+            <Pattern>%d %-5level [${springAppName},%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId},%X{X-Span-Export}][%thread] %logger{0}: %msg%n</Pattern>
+        </encoder>
+    </appender>
+    
+     <logger name="com.epam.users" level="info" additivity="false">
+        <appender-ref ref="FILE_BEATS" />
+        <!-- <appender-ref ref="Console" /> -->
+    </logger>
+    
+    <root level="${logging.level.root}">
+        <appender-ref ref="FILE_BEATS"/>
+    </root>
+	<logger name="com.netflix.discovery" level="INFO" />
+
+
+</configuration>

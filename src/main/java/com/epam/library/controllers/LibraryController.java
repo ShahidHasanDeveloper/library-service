@@ -2,6 +2,8 @@ package com.epam.library.controllers;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -29,6 +31,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(tags = "Library Management RESTful Services", description = "Controller for library service")
 public class LibraryController {
 
+	private final Logger logger = LoggerFactory.getLogger(LibraryController.class);
 	@Autowired
 	private LibraryService libraryService;
 	
@@ -48,6 +51,7 @@ public class LibraryController {
 	@PostMapping(value="/books", consumes= MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Void> addBook(@RequestBody Book book, UriComponentsBuilder builder) {
 		libraryService.addBook(book, builder);
+		logger.debug("LibraryController | addBook | Book is added");
 		return new ResponseEntity<Void>(HttpStatus.CREATED);
 	}
 	
@@ -56,6 +60,7 @@ public class LibraryController {
 	public ResponseEntity<Void> deleteBookById(@PathVariable("book_id") Long id ) {
 		boolean isBookDisAssociated=libraryService.deleteBookAssociationWithUser(id);
 		if(isBookDisAssociated) {
+			logger.debug("LibraryController | deleteBookById | isBookDisAssociated {} "+isBookDisAssociated);
 			libraryService.deleteBookById(id);
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -99,6 +104,7 @@ public class LibraryController {
 		boolean isBookIssued = libraryService.issueBook(userId, bookId);
 		HttpStatus status = HttpStatus.OK;
 		if(!isBookIssued) {
+			logger.info("LibraryController | issueBook | isBookIssued {} "+isBookIssued);
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 		return new ResponseEntity<Void>(status);
@@ -110,6 +116,7 @@ public class LibraryController {
 		boolean isBookReturned = libraryService.bookReturnedToLibrary(userId, bookId);
 		HttpStatus status = HttpStatus.OK;
 		if(!isBookReturned) {
+			logger.info("LibraryController | issueBook | isBookReturned {} "+isBookReturned);
 			status = HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 		return new ResponseEntity<Void>(status);

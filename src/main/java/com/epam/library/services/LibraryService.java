@@ -34,13 +34,11 @@ public class LibraryService {
 	private String gsiName;
 	@Autowired
 	private UserServiceFeignClient userServiceFiegnClient;
-
 	@Autowired
 	private BookServiceFeignClient bookServiceFeignClient;
-
 	@Autowired
 	AmazonDynamoDB dynamdoDBClient;
-
+	
 	@HystrixCommand
 	public List<Book> getAllBooks(){
 		return bookServiceFeignClient.getAllBooks();
@@ -67,6 +65,7 @@ public class LibraryService {
 	@HystrixCommand
 	public UserBookAssociationDetail getUserProfileWithIssuedBooks(Long userId){
 		User user=userServiceFiegnClient.getUserById(userId);
+		logger.debug("LibraryService | getUserProfileWithIssuedBooks | user id {} "+user.getId()+  " user name {} "+user.getFirstname());
 		if(user!=null) {
 			Library library= new Library();
 			library.setUserid(userId);
@@ -84,14 +83,14 @@ public class LibraryService {
 						.map(bookId->bookServiceFeignClient.getBookById(bookId))
 						.collect(Collectors.toList());
 
-
+				logger.debug("LibraryService | getUserProfileWithIssuedBooks  | total books associated {} "+ (booksAssociatedWithUserId!=null?booksAssociatedWithUserId.size():0));
 				return UserBookAssociationDetail
 						.builder()
 						.user(user)
 						.issuedBooks(booksAssociatedWithUserId)
 						.build();
 			}catch(Exception e) {
-				e.printStackTrace();
+				logger.error("LibraryService | getUserProfileWithIssuedBooks | Exception {} "+e.getMessage());
 			}	
 		}	
 		return null;
@@ -108,7 +107,7 @@ public class LibraryService {
 			mapper.delete(library);
 			return true;
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error("LibraryService | deleteBookAssociationWithUser | Exception {} "+e.getMessage());
 		}
 
 		return false;
@@ -146,7 +145,7 @@ public class LibraryService {
 			return true;
 
 		}catch(Exception e) {
-			e.printStackTrace();
+			logger.error("LibraryService | issueBook | Exception {} "+e.getMessage());
 		}
 
 		return false;
@@ -174,8 +173,8 @@ public class LibraryService {
 			List<Library> libaryRecords=mapper.query(Library.class, queryExpression);
 				
 			if(null!=libaryRecords && libaryRecords.size()>0) {
+				logger.info("LibraryService | removeBookUserAssociation | libaryRecords.size() {} "+libaryRecords.size() + " bookId {} "+bookId);
 				if(bookId==null) {
-
 					libaryRecords
 					.stream()
 					.map(Library::getBookid)
@@ -198,14 +197,13 @@ public class LibraryService {
 
 
 			}
-
+			logger.info("LibraryService | removeBookUserAssociation | return {} true");
 			return true;
 		}catch(Exception e) {
-			System.out.println("got error :"+e.getMessage());
-			e.printStackTrace();
+			logger.error("LibraryService | removeBookUserAssociation | Exception {} "+e.getMessage());
 		}	
 
-
+		logger.info("LibraryService | removeBookUserAssociation | return {} false");
 		return false;
 
 	}
