@@ -15,7 +15,7 @@
         </encoder>
     </appender>
     
-     <logger name="com.epam.users" level="info" additivity="false">
+     <logger name="${logging.level.com.epam.library}" level="info" additivity="false">
         <appender-ref ref="FILE_BEATS" />
         <!-- <appender-ref ref="Console" /> -->
     </logger>
